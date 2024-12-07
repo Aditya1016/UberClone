@@ -1,7 +1,7 @@
 import {User} from "../models/user.model.js"
 import {createUser} from "../services/user.services.js"
 import { validationResult } from "express-validator"
-import { ApiError } from "../utils/ApiError.js";
+import {BlacklistedToken} from "../models/blacklistToken.model.js"
 
 const registerUser = async (req, res) => {
     const errors = validationResult(req);
@@ -60,10 +60,39 @@ const loginUser = async (req, res) => {
 
     const token = user.generateAuthToken()
 
+    res.cookie('token', token);
+
     res.status(200).json({token, user});
 }
 
+const getUserProfile = async (req, res, next) => {
+    console.log(req.headers)
+    res.status(200).json(req.user)
+}
+
+const logoutUser = async (req, res, next) => {
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+        return res.status(400).json({ message: "No token provided" });
+    }
+
+    try {
+        await BlacklistedToken.create({ token });
+
+        res.clearCookie("token");
+
+        return res.status(200).json({ message: "Logged out successfully" });
+    } catch (err) {
+        console.error("Logout Error:", err.message);
+        return res.status(500).json({ message: "Failed to log out" });
+    }
+};
+
+
 export {
     registerUser,
-    loginUser
+    loginUser,
+    getUserProfile,
+    logoutUser
 }
