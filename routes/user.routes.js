@@ -24,4 +24,4 @@ router.get('/profile', authUser, getUserProfile)
 
 router.post('/logout', authUser, logoutUser)
 
-export default router
+export { router } 
