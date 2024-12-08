@@ -22,6 +22,6 @@ router.post('/login', [
 
 router.get('/profile', authUser, getUserProfile)
 
-router.post('/logout', authUser, logoutUser)
+router.get('/logout', authUser, logoutUser)
 
 export { router } 
